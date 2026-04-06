@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skidwurd Private</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap');
+
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:#020617;
+  color:#e2e8f0;
+}
+
+.center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:30px;
+  border-radius:12px;
+  width:320px;
+  box-shadow:0 0 40px rgba(56,189,248,0.15);
+}
+
+h2{
+  margin-bottom:5px;
+}
+
+.sub{
+  color:#64748b;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:white;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#f59e0b;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.link{
+  text-align:center;
+  margin-top:10px;
+  color:#f97316;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.hidden{display:none}
+
+/* MAIN UI */
+.nav{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  padding:15px;
+  border-bottom:1px solid #1e293b;
+}
+
+.nav button{
+  background:none;
+  color:#38bdf8;
+}
+
+.page{display:none;padding:30px}
+.active{display:block}
+
+.glow{
+  box-shadow:0 0 20px rgba(56,189,248,0.3);
+}
+
+.executor-box{
+  max-width:700px;
+  margin:auto;
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:25px;
+  border-radius:12px;
+}
+
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:15px;
+}
+
+.game-card{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:15px;
+  border-radius:10px;
+  transition:0.2s;
+}
+
+.game-card:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 20px rgba(56,189,248,0.2);
+}
+
+.add-box{
+  margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth" class="center">
+  <div class="card">
+    <h2 id="authTitle">spunch.club</h2>
+    <div class="sub" id="authSub">Sign in</div>
+
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <input id="invite" placeholder="Invite Key" class="hidden">
+
+    <button onclick="submitAuth()" id="authBtn">Login</button>
+    <div class="link" onclick="toggleMode()" id="switchText">Create account</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" class="hidden">
+  <div class="nav">
+    <button onclick="showPage('home')">Home</button>
+    <button onclick="showPage('executor')">Executor</button>
+    <button onclick="showPage('games')">Games</button>
+  </div>
+
+  <div id="home" class="page active">
+    <h2 id="welcome"></h2>
+  </div>
+
+  <div id="executor" class="page">
+    <div class="executor-box glow">
+      <h2>Skidwurd</h2>
+      <p style="color:#94a3b8">
+      Skidwurd – Private Backdoor is a multi-phase private tool built for direct control and quick access inside your sessions...
+      </p>
+    </div>
+  </div>
+
+  <div id="games" class="page">
+    <div class="games-grid" id="gameList"></div>
+
+    <div class="add-box">
+      <input id="newGame" placeholder="Paste Roblox link">
+      <button onclick="addGame()">Add Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let signup=false;
+const INVITE_KEY="Skidwurd-Priv-Backdoor-10188-6767";
+
+function toggleMode(){
+ signup=!signup;
+ authSub.innerText=signup?'Create account':'Sign in';
+ authBtn.innerText=signup?'Create Account':'Login';
+ invite.classList.toggle('hidden',!signup);
+ switchText.innerText=signup?'Already have an account?':'Create account';
+}
+
+function submitAuth(){
+ let u=username.value;
+ let p=password.value;
+ let i=invite.value;
+
+ if(signup){
+  if(i!==INVITE_KEY){alert('Invalid Key');return}
+  localStorage.setItem('user_'+u,p);
+ }else{
+  if(localStorage.getItem('user_'+u)!==p){alert('Wrong login');return}
+ }
+
+ localStorage.setItem('currentUser',u);
+ startApp();
+}
+
+function startApp(){
+ auth.classList.add('hidden');
+ main.classList.remove('hidden');
+ welcome.innerText='Hello, '+localStorage.getItem('currentUser');
+ loadGames();
+}
+
+function showPage(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+}
+
+let defaultGames=[
+"https://www.roblox.com/games/105025950852978",
+"https://www.roblox.com/games/80289763682776",
+"https://www.roblox.com/games/128986903070703",
+"https://www.roblox.com/games/117377145597892"
+];
+
+function loadGames(){
+ let list=JSON.parse(localStorage.getItem('games')||JSON.stringify(defaultGames));
+ let el=document.getElementById('gameList');
+ el.innerHTML='';
+
+ list.forEach(g=>{
+   let card=document.createElement('div');
+   card.className='game-card';
+   card.innerHTML=`<a href="${g}" target="_blank" style="color:#38bdf8">Open Game</a>`;
+   el.appendChild(card);
+ });
+}
+
+function addGame(){
+ let g=newGame.value;
+ if(!g)return;
+ let list=JSON.parse(localStorage.getItem('games')||'[]');
+ list.push(g);
+ localStorage.setItem('games',JSON.stringify(list));
+ loadGames();
+}
+
+if(localStorage.getItem('currentUser')) startApp();
+</script>
+
+</body>
+</html>
